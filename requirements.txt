@@ -1,5 +1,2 @@
-requests
 pandas
-networkx
-pyvis
-plotly
+requests

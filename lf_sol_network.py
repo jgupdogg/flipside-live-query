@@ -1,12 +1,18 @@
+<<<<<<< HEAD
 # lambda_function.py
+=======
+>>>>>>> ee6ba8d4dc713ab22a3151aeae07eff1b918b508
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
 import networkx as nx
 from pyvis.network import Network
 import base64
+<<<<<<< HEAD
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+=======
+>>>>>>> ee6ba8d4dc713ab22a3151aeae07eff1b918b508
 
 def fetch_flipside_crypto_data(url):
     try:
@@ -30,8 +36,15 @@ def filter_and_save(df, days):
 def count_unique_traders(filtered_df):
     unique_sellers = filtered_df.groupby('SWAP_FROM_SYMBOL')['SWAPPER'].nunique().reset_index()
     unique_sellers.columns = ['TOKEN', 'UNIQUE_SELLERS']
+<<<<<<< HEAD
     unique_buyers = filtered_df.groupby('SWAP_TO_SYMBOL')['SWAPPER'].nunique().reset_index()
     unique_buyers.columns = ['TOKEN', 'UNIQUE_BUYERS']
+=======
+    
+    unique_buyers = filtered_df.groupby('SWAP_TO_SYMBOL')['SWAPPER'].nunique().reset_index()
+    unique_buyers.columns = ['TOKEN', 'UNIQUE_BUYERS']
+    
+>>>>>>> ee6ba8d4dc713ab22a3151aeae07eff1b918b508
     unique_traders = pd.merge(unique_sellers, unique_buyers, on='TOKEN', how='outer')
     return unique_traders
 
@@ -40,6 +53,7 @@ def generate_network_graph(df):
     for index, row in df.iterrows():
         if pd.notna(row['SWAP_FROM_SYMBOL']) and pd.notna(row['SWAP_TO_SYMBOL']):
             G.add_edge(row['SWAP_FROM_SYMBOL'], row['SWAP_TO_SYMBOL'], weight=row['TOTAL_SWAP_FROM_AMOUNT_USD'])
+<<<<<<< HEAD
     net = Network(notebook=False)
     net.from_nx(G)
     net.show("swap_network.html")
@@ -103,24 +117,55 @@ def generate_plot(filtered_df, selected_day):
 
 def lambda_handler(event, context):
     url = 'https://flipsidecrypto.xyz/api/v1/queries/9723aa06-ecb6-4c5d-9503-44f7b19e09de/data/latest'
+=======
+    
+    net = Network(notebook=False)
+    net.from_nx(G)
+    net.show("swap_network.html")
+    
+    with open("swap_network.html", "r") as file:
+        html_content = file.read()
+        
+    return base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
+
+def lambda_handler(event, context):
+    url = 'https://flipsidecrypto.xyz/api/v1/queries/9723aa06-ecb6-4c5d-9503-44f7b19e09de/data/latest'
+    
+>>>>>>> ee6ba8d4dc713ab22a3151aeae07eff1b918b508
     data = fetch_flipside_crypto_data(url)
     if not data:
         return {
             'statusCode': 500,
             'body': 'Failed to fetch data'
         }
+<<<<<<< HEAD
     df = pd.DataFrame(data)
     filtered_df = filter_and_save(df, 1)
     unique_traders = count_unique_traders(filtered_df)
     network_graph_html = generate_network_graph(filtered_df)
     selected_day = '2024-07-09'
     plot_html = generate_plot(filtered_df, selected_day)
+=======
+    
+    df = pd.DataFrame(data)
+    
+    filtered_df = filter_and_save(df, 1)
+    
+    unique_traders = count_unique_traders(filtered_df)
+    
+    network_graph_html = generate_network_graph(filtered_df)
+    
+>>>>>>> ee6ba8d4dc713ab22a3151aeae07eff1b918b508
     return {
         'statusCode': 200,
         'body': {
             'filtered_data': filtered_df.to_dict(orient='records'),
             'unique_traders': unique_traders.to_dict(orient='records'),
+<<<<<<< HEAD
             'network_graph_html': network_graph_html,
             'plot_html': plot_html
+=======
+            'network_graph_html': network_graph_html
+>>>>>>> ee6ba8d4dc713ab22a3151aeae07eff1b918b508
         }
     }

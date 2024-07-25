@@ -32,6 +32,60 @@ def transform_data_to_cytoscape_format(data):
         usd_amount = record['TOTAL_AMOUNT_USD']
         transaction_count = record['TRANSACTION_COUNT']
 
+        # Update node data or create new if not exists for FROM_LABEL
+        if from_label not in nodes:
+            nodes[from_label] = {
+                'data': {
+                    'id': from_label,
+                    'label': from_label,
+                    'total_transacted': total_amount,
+                    'transaction_count': transaction_count
+                }
+            }
+        else:
+            nodes[from_label]['data']['total_transacted'] += total_amount
+            nodes[from_label]['data']['transaction_count'] += transaction_count
+
+        # Update node data or create new if not exists for TO_LABEL
+        if to_label not in nodes:
+            nodes[to_label] = {
+                'data': {
+                    'id': to_label,
+                    'label': to_label,
+                    'total_transacted': total_amount,
+                    'transaction_count': transaction_count
+                }
+            }
+        else:
+            nodes[to_label]['data']['total_transacted'] += total_amount
+            nodes[to_label]['data']['transaction_count'] += transaction_count
+
+        edges.append({
+            'data': {
+                'id': tx_hash,
+                'source': from_label,
+                'target': to_label,
+                'total_amount': total_amount,
+                'usd_amount': usd_amount,
+                'symbol': symbol,
+                'transaction_count': transaction_count
+            }
+        })
+
+    elements = list(nodes.values()) + edges
+    return elements
+    nodes = {}
+    edges = []
+
+    for record in data:
+        from_label = record['FROM_LABEL']
+        to_label = record['TO_LABEL']
+        tx_hash = f"{from_label}_to_{to_label}"
+        total_amount = record['TOTAL_AMOUNT']
+        symbol = record['SYMBOL']
+        usd_amount = record['TOTAL_AMOUNT_USD']
+        transaction_count = record['TRANSACTION_COUNT']
+
         if from_label not in nodes:
             nodes[from_label] = {'data': {'id': from_label, 'label': from_label}}
         if to_label not in nodes:

@@ -25,7 +25,9 @@ def transform_data_to_cytoscape_format(data):
 
     for record in data:
         from_label = record['FROM_LABEL']
+        from_label_type = record.get('FROM_LABEL_TYPE', 'Unknown')  # Use 'Unknown' if type is not specified
         to_label = record['TO_LABEL']
+        to_label_type = record.get('TO_LABEL_TYPE', 'Unknown')  # Use 'Unknown' if type is not specified
         tx_hash = f"{from_label}_to_{to_label}"
         total_amount = record['TOTAL_AMOUNT']
         symbol = record['SYMBOL']
@@ -38,6 +40,7 @@ def transform_data_to_cytoscape_format(data):
                 'data': {
                     'id': from_label,
                     'label': from_label,
+                    'label_type': from_label_type,
                     'total_transacted': total_amount,
                     'transaction_count': transaction_count
                 }
@@ -52,6 +55,7 @@ def transform_data_to_cytoscape_format(data):
                 'data': {
                     'id': to_label,
                     'label': to_label,
+                    'label_type': to_label_type,
                     'total_transacted': total_amount,
                     'transaction_count': transaction_count
                 }
@@ -59,37 +63,6 @@ def transform_data_to_cytoscape_format(data):
         else:
             nodes[to_label]['data']['total_transacted'] += total_amount
             nodes[to_label]['data']['transaction_count'] += transaction_count
-
-        edges.append({
-            'data': {
-                'id': tx_hash,
-                'source': from_label,
-                'target': to_label,
-                'total_amount': total_amount,
-                'usd_amount': usd_amount,
-                'symbol': symbol,
-                'transaction_count': transaction_count
-            }
-        })
-
-    elements = list(nodes.values()) + edges
-    return elements
-    nodes = {}
-    edges = []
-
-    for record in data:
-        from_label = record['FROM_LABEL']
-        to_label = record['TO_LABEL']
-        tx_hash = f"{from_label}_to_{to_label}"
-        total_amount = record['TOTAL_AMOUNT']
-        symbol = record['SYMBOL']
-        usd_amount = record['TOTAL_AMOUNT_USD']
-        transaction_count = record['TRANSACTION_COUNT']
-
-        if from_label not in nodes:
-            nodes[from_label] = {'data': {'id': from_label, 'label': from_label}}
-        if to_label not in nodes:
-            nodes[to_label] = {'data': {'id': to_label, 'label': to_label}}
 
         edges.append({
             'data': {

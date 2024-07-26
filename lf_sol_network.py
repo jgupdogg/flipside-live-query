@@ -88,11 +88,13 @@ def transform_data_to_cytoscape_format(data):
                     'label_type': from_label_type,
                     'total_transacted': total_amount,
                     'transaction_count': transaction_count,
+                    'total_usd_amount': usd_amount,
                 }
             }
         else:
             nodes[from_label]['data']['total_transacted'] += total_amount
             nodes[from_label]['data']['transaction_count'] += transaction_count
+            nodes[from_label]['data']['total_usd_amount'] += usd_amount
 
         # Update node data or create new if not exists for TO_LABEL
         if to_label not in nodes:
@@ -102,12 +104,14 @@ def transform_data_to_cytoscape_format(data):
                     'label': to_label,
                     'label_type': to_label_type,
                     'total_transacted': total_amount,
-                    'transaction_count': transaction_count
+                    'transaction_count': transaction_count,
+                    'total_usd_amount': usd_amount,
                 }
             }
         else:
             nodes[to_label]['data']['total_transacted'] += total_amount
             nodes[to_label]['data']['transaction_count'] += transaction_count
+            nodes[to_label]['data']['total_usd_amount'] += usd_amount
 
         edges.append({
             'data': {

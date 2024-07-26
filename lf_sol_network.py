@@ -63,51 +63,24 @@ def create_or_update_node(nodes, label, label_type, total_amount, transaction_co
 def transform_data_to_cytoscape_format(data):
     nodes = {}
     edges = []
+    label_type_colors = {}
 
     for record in data:
+        if record['TOTAL_AMOUNT_USD'] is None:
+            continue
+
         from_label = record['FROM_LABEL']
-        from_label_type = record.get('FROM_LABEL_TYPE', 'Unknown')  # Use 'Unknown' if type is not specified
+        from_label_type = record.get('FROM_LABEL_TYPE') or 'unknown'
         to_label = record['TO_LABEL']
-        to_label_type = record.get('TO_LABEL_TYPE', 'Unknown')  # Use 'Unknown' if type is not specified
+        to_label_type = record.get('TO_LABEL_TYPE') or 'unknown'
         tx_hash = f"{from_label}_to_{to_label}"
         total_amount = record['TOTAL_AMOUNT']
         symbol = record['SYMBOL']
         usd_amount = record['TOTAL_AMOUNT_USD']
         transaction_count = record['TRANSACTION_COUNT']
 
-        # Update node data or create new if not exists for FROM_LABEL
-        if from_label not in nodes:
-            nodes[from_label] = {
-                'data': {
-                    'id': from_label,
-                    'label': from_label,
-                    'label_type': from_label_type,
-                    'total_transacted': total_amount,
-                    'transaction_count': transaction_count,
-                    'total_usd_amount': usd_amount,
-                }
-            }
-        else:
-            nodes[from_label]['data']['total_transacted'] += total_amount
-            nodes[from_label]['data']['transaction_count'] += transaction_count
-            nodes[from_label]['data']['total_usd_amount'] += usd_amount
-
-        # Update node data or create new if not exists for TO_LABEL
-        if to_label not in nodes:
-            nodes[to_label] = {
-                'data': {
-                    'id': to_label,
-                    'label': to_label,
-                    'label_type': to_label_type,
-                    'total_transacted': total_amount,
-                    'transaction_count': transaction_count,
-                    'total_usd_amount': usd_amount,
-                }
-            }
-        else:
-            nodes[to_label]['data']['total_transacted'] += total_amount
-            nodes[to_label]['data']['transaction_count'] += transaction_count
-            nodes[to_label]['data']['total_usd_amount'] += usd_amount
+        create_or_update_node(nodes, from_label, from_label_type, total_amount, transaction_count, usd_amount, label_type_colors)
+        create_or_update_node(nodes, to_label, to_label_type, total_amount, transaction_count, usd_amount, label_type_colors)
 
         logger.info(f"Adding edge with usd_amount: {usd_amount}")  # Debug logging
         edges.append({

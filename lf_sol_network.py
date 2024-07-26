@@ -1,6 +1,12 @@
 import json
 import logging
 import requests
+import random
+
+PREDEFINED_COLORS = [
+    "#66b3ff", "#ff6666", "#6a0dad", "#ff8c00", "#ffd700",
+    "#adff2f", "#20b2aa", "#ff6347", "#8a2be2", "#00ced1"
+]
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -18,6 +24,45 @@ def fetch_data(url):
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return None
+    
+
+def get_color(label_type, label_type_colors):
+    if label_type not in label_type_colors:
+        color_index = len(label_type_colors) % len(PREDEFINED_COLORS)
+        label_type_colors[label_type] = PREDEFINED_COLORS[color_index]
+    return label_type_colors[label_type]
+
+def normalize(value, min_value, max_value):
+    if max_value == min_value:
+        return 1
+    return (value - min_value) / (max_value - min_value)
+
+def create_or_update_node(nodes, label, label_type, total_amount, transaction_count, usd_amount, label_type_colors):
+    color = get_color(label_type, label_type_colors)
+    if label not in nodes:
+        nodes[label] = {
+            'data': {
+                'id': label,
+                'label': label,
+                'label_type': label_type,
+                'total_transacted': total_amount,
+                'transaction_count': transaction_count,
+                'total_usd_amount': usd_amount,
+                'background_color': color,
+                'width': 10 + total_amount ** 0.5 * 20,
+                'height': 10 + total_amount ** 0.5 * 20,
+                'opacity': max(0.1, transaction_count / 100)
+            }
+        }
+    else:
+        nodes[label]['data']['total_transacted'] += total_amount
+        nodes[label]['data']['transaction_count'] += transaction_count
+        nodes[label]['data']['total_usd_amount'] += usd_amount
+        nodes[label]['data']['width'] = 10 + nodes[label]['data']['total_transacted'] ** 0.5 * 20
+        nodes[label]['data']['height'] = 10 + nodes[label]['data']['total_transacted'] ** 0.5 * 20
+        nodes[label]['data']['opacity'] = max(0.1, nodes[label]['data']['transaction_count'] / 100)
+
+
 
 def transform_data_to_cytoscape_format(data):
     nodes = {}
@@ -42,7 +87,7 @@ def transform_data_to_cytoscape_format(data):
                     'label': from_label,
                     'label_type': from_label_type,
                     'total_transacted': total_amount,
-                    'transaction_count': transaction_count
+                    'transaction_count': transaction_count,
                 }
             }
         else:

@@ -1,15 +1,14 @@
 import json
 import logging
 import requests
-import random
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 PREDEFINED_COLORS = [
     "#66b3ff", "#ff6666", "#6a0dad", "#ff8c00", "#ffd700",
     "#adff2f", "#20b2aa", "#ff6347", "#8a2be2", "#00ced1"
 ]
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 url = "https://flipsidecrypto.xyz/api/v1/queries/1a10bea8-8307-417b-af3d-57327b93db7d/data/latest"
 
@@ -24,7 +23,6 @@ def fetch_data(url):
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         return None
-    
 
 def get_color(label_type, label_type_colors):
     if label_type not in label_type_colors:
@@ -61,8 +59,6 @@ def create_or_update_node(nodes, label, label_type, total_amount, transaction_co
         nodes[label]['data']['width'] = 10 + nodes[label]['data']['total_transacted'] ** 0.5 * 20
         nodes[label]['data']['height'] = 10 + nodes[label]['data']['total_transacted'] ** 0.5 * 20
         nodes[label]['data']['opacity'] = max(0.1, nodes[label]['data']['transaction_count'] / 100)
-
-
 
 def transform_data_to_cytoscape_format(data):
     nodes = {}
@@ -113,6 +109,7 @@ def transform_data_to_cytoscape_format(data):
             nodes[to_label]['data']['transaction_count'] += transaction_count
             nodes[to_label]['data']['total_usd_amount'] += usd_amount
 
+        logger.info(f"Adding edge with usd_amount: {usd_amount}")  # Debug logging
         edges.append({
             'data': {
                 'id': tx_hash,
@@ -157,10 +154,10 @@ def lambda_handler(event, context):
         return {
             'statusCode': 200,
             'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            },
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+                },
             'body': json.dumps(result)
         }
     except Exception as e:
